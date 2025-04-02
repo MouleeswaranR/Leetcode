@@ -1,14 +1,14 @@
 class Solution {
     public int findCircleNum(int[][] isConnected) {
-        int c = 0,n = isConnected.length,m = isConnected[0].length;
+        int cnt = 0,n = isConnected.length,m = isConnected[0].length;
         boolean[] vis = new boolean[n];
         for(int i = 0;i<n;i++){
             if(!vis[i]){
-                c++;
+                cnt++;
                 dfs(isConnected,n,m,i,vis);
             }
         }
-        return c;
+        return cnt;
     }
     void dfs(int[][] mat,int n,int m,int src,boolean[] vis){
           vis[src] = true;
