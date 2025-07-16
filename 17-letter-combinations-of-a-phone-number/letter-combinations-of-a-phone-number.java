@@ -1,21 +1,25 @@
 class Solution {
+    List<String> res=null;
+    String[] digitToLetters={"","","abc","def","ghi","jkl","mno","pqrs","tuv","wxyz"};
     public List<String> letterCombinations(String digits) {
-        String[] map={"","","abc","def","ghi","jkl","mno","pqrs","tuv","wxyz"};
-        List<String> result=new ArrayList<>();
-        if(digits.length()==0)return result;
-        result.add("");
-        for(int i=0;i<digits.length();i++){
-            result=combine(map[digits.charAt(i)-'0'],result);
-        }
-        return result;
+       res=new ArrayList<>();
+       if(digits.length()==0)return res;
+       fun(0,digits,new StringBuilder(""));
+       return res;
+
     }
-    public List<String> combine(String digit,List<String> l){
-        List<String>result=new ArrayList<>();
-        for(int i=0;i<digit.length();i++){
-            for(String x:l){
-                result.add(x+digit.charAt(i));
-            }
+    void fun(int len,String dig,StringBuilder temp){
+        if(len==dig.length()){
+            res.add(temp.toString());
+            return;
         }
-        return result;
+        char ch=dig.charAt(len);
+        String str=digitToLetters[ch-'0'];
+        for(char c:str.toCharArray()){
+            temp.append(c);
+            fun(len+1,dig,temp);
+            temp.deleteCharAt(temp.length()-1);
+        }
+       
     }
 }
