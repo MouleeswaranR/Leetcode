@@ -4,12 +4,15 @@ class Solution {
         if(row*col!=r*c)return mat;
         int index=0;
         int[][] reshapedMat=new int[r][c];
+        int nrow=0,ncol=0;
         for(int i=0;i<row;i++){
             for(int j=0;j<col;j++){
-                int crow=index/c;
-                int ccol=index%c;
-                reshapedMat[crow][ccol]=mat[i][j];
-                index++;
+              reshapedMat[nrow][ncol]=mat[i][j];
+              ncol++;
+              if(ncol==c){
+                ncol=0;
+                nrow++;
+              }
             }
         }
         return reshapedMat;
