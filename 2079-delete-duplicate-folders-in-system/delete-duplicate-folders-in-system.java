@@ -1,73 +1,88 @@
-import java.util.*;
-
 class Solution {
-    class Node {
-        String name;
-        Map<String, Node> children = new HashMap<>();
-        boolean deleted = false;
+    class TrieNode {
+        String node;
+        HashMap<String, TrieNode> map = new HashMap<>();
+        boolean isRemoved = false;
 
-        Node(String name) { this.name = name; }
+        TrieNode(String node) {
+            this.node = node;
+        }
     }
 
-    private final Map<String, List<Node>> groups = new HashMap<>();
+    TrieNode root;
 
-    public List<List<String>> deleteDuplicateFolder(List<List<String>> paths){
-        Node root = new Node("");
+    public List<List<String>> deleteDuplicateFolder(List<List<String>> paths) {
+        root = new TrieNode("*");
 
-        for (List<String> path : paths) {
-            Node cur = root;
-            for (String dir : path) {
-                cur = cur.children.computeIfAbsent(dir, Node::new);
-            }
+        for (List<String> list : paths) {
+            insertIntoTrie(root, list);
         }
 
-        serialize(root);
-
-        for (List<Node> same : groups.values()) {
-            if (same.size() > 1) {
-                for (Node n : same) markDeleted(n);
-            }
-        }
+        HashMap<String, TrieNode> visited = new HashMap<>();
+        markRepeated(root, visited);
 
         List<List<String>> ans = new ArrayList<>();
-        collect(root, new ArrayList<>(), ans);
+        List<String> cur = new ArrayList<>();
+
+        for (Map.Entry<String, TrieNode> entry : root.map.entrySet()) {
+            save(entry.getValue(), cur, ans);
+        }
+
         return ans;
+
     }
 
-    private String serialize(Node node) {
-        if (node.children.isEmpty()) return "";
+    public void insertIntoTrie(TrieNode root, List<String> lists) {
+        TrieNode cur = root;
 
-        List<String> parts = new ArrayList<>();
-        for (Map.Entry<String, Node> e : node.children.entrySet()) {
-            String childSig = serialize(e.getValue());
-            parts.add(e.getKey() + "#" + childSig);
+        for (String str : lists) {
+            if (!cur.map.containsKey(str)) {
+                TrieNode newNode = new TrieNode(str);
+                cur.map.put(str, newNode);
+                cur = cur.map.get(str);
+            } else {
+                cur = cur.map.get(str);
+            }
         }
-        Collections.sort(parts);
-
-        StringBuilder sb = new StringBuilder("(");
-        for (String p : parts) sb.append(p).append(",");
-        sb.append(")");
-        String sig = sb.toString();
-
-        groups.computeIfAbsent(sig, k -> new ArrayList<>()).add(node);
-        return sig;
     }
 
-    private void markDeleted(Node node) {
-        node.deleted = true;
-        for (Node child : node.children.values()) markDeleted(child);
-    }
+    public String markRepeated(TrieNode root, HashMap<String, TrieNode> visited) {
+        List<String> childrenSignatures = new ArrayList<>();
 
-    private void collect(Node node, List<String> path,
-                         List<List<String>> res) {
-        for (Map.Entry<String, Node> e : node.children.entrySet()) {
-            Node child = e.getValue();
-            if (child.deleted) continue;
-
-            path.add(child.name);
-            res.add(new ArrayList<>(path));
-            collect(child, path, res);
-            path.removeLast();
+        for (Map.Entry<String, TrieNode> entry : root.map.entrySet()) {
+            String childSignature = markRepeated(entry.getValue(), visited);
+            childrenSignatures.add(entry.getKey() + childSignature); 
         }
+
+        Collections.sort(childrenSignatures);
+        String key = String.join("", childrenSignatures);
+
+        if (!key.isEmpty()) {
+            key = "[" + key + "]"; 
+
+            if (visited.containsKey(key)) {
+                root.isRemoved = true;
+                visited.get(key).isRemoved = true;
+            } else {
+                visited.put(key, root);
+            }
+        }
+
+        return key;
+    }
+
+    public void save(TrieNode root, List<String> cur, List<List<String>> ans) {
+        if (root.isRemoved) {
+            return;
+        }
+
+        cur.add(root.node);
+        ans.add(new ArrayList<>(cur));
+
+        for (Map.Entry<String, TrieNode> entry : root.map.entrySet()) {
+            save(entry.getValue(), cur, ans);
+        }
+
+        cur.remove(cur.size() - 1);
     }
 }
