@@ -7,16 +7,16 @@ class Solution {
         vis.add(s);
 
         while(!q.isEmpty()){
-            String cur=q.poll();
-            if(cur.compareTo(smallest)<0)smallest=cur;
+            String curr=q.poll();
+            if(curr.compareTo(smallest)<0)smallest=curr;
 
-            StringBuilder sb=new StringBuilder(cur);
+            StringBuilder sb=new StringBuilder(curr);
             for(int i=1;i<sb.length();i+=2){
-                sb.setCharAt(i,(char)((sb.charAt(i)-'0'+a)%10+'0'));
+               sb.setCharAt(i, (char) ((sb.charAt(i) - '0' + a) % 10 + '0'));
             }
             String added=sb.toString();
             if(vis.add(added))q.offer(added);
-            String rotated=cur.substring(cur.length()-b)+cur.substring(0,cur.length()-b);
+            String rotated=curr.substring(curr.length()-b)+curr.substring(0,curr.length()-b);
             if(vis.add(rotated))q.offer(rotated);
         }
         return smallest;
