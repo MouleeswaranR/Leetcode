@@ -1,5 +1,8 @@
 class Solution {
-    public int minCost(String colors, int[] needTime) {
+      static {
+        for(int i=0; i<400; i++) minCost("a", new int[1]);
+    }
+    public static int minCost(String colors, int[] needTime) {
        int ans=0;
        for(int i=1;i<colors.length();i++){
         if(colors.charAt(i)==colors.charAt(i-1)){
