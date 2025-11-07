@@ -1,70 +1,57 @@
-class DSU {
-    int[] parent;
-
-    public DSU(int n) {
-        parent = new int[n + 1];
-        for (int i = 0; i <= n; i++)
-            parent[i] = i;
-    }
-
-    public int find(int x) {
-        if (parent[x] != x)
-            parent[x] = find(parent[x]); 
-        return parent[x];
-    }
-
-    public boolean union(int x, int y) {
-        int px = find(x), py = find(y);
-        if (px == py)
-            return false;
-        parent[py] = px;
-        return true;
-    }
-}
-
 class Solution {
-    public int[] processQueries(int c, int[][] connections, int[][] queries) {
-        DSU dsu = new DSU(c);
-        boolean[] online = new boolean[c + 1];
-        Arrays.fill(online, true);
+    public void dfs(int node,Map<Integer,ArrayList<Integer>> adjList,int component_id, boolean[] vis, int[] componentId, Map<Integer,TreeSet<Integer>> componentMap){
+        vis[node]=true;
+        componentId[node]=component_id;
+        if(!componentMap.containsKey(component_id))componentMap.put(component_id,new TreeSet<>());
+        componentMap.get(component_id).add(node);
 
-        for (int[] conn : connections)
-            dsu.union(conn[0], conn[1]);
-
-        Map<Integer, PriorityQueue<Integer>> componentHeap = new HashMap<>();
-        for (int station = 1; station <= c; station++) {
-            int root = dsu.find(station);
-            componentHeap.putIfAbsent(root, new PriorityQueue<>());
-            componentHeap.get(root).offer(station);
+        for(int adjNode:adjList.getOrDefault(node, new ArrayList<>())){
+            if(!vis[adjNode])dfs(adjNode,adjList,component_id,vis,componentId,componentMap);
         }
 
-        List<Integer> result = new ArrayList<>();
+    }
+    public int[] processQueries(int c, int[][] connections, int[][] queries) {
+        Map<Integer,ArrayList<Integer>> adjList=new HashMap<>();
 
-        for (int[] query : queries) {
-            int type = query[0], x = query[1];
+        for(int[] connection:connections){
+            int node1=connection[0],node2=connection[1];
+            if(!adjList.containsKey(node1))adjList.put(node1,new ArrayList<>());
+             if(!adjList.containsKey(node2))adjList.put(node2,new ArrayList<>());
+            adjList.get(node1).add(node2);
+            adjList.get(node2).add(node1);
+        }
 
-            if (type == 2) {
-                online[x] = false;
-            } else {
-                if (online[x]) {
-                    result.add(x);
-                } else {
-                    int root = dsu.find(x);
-                    PriorityQueue<Integer> heap = componentHeap.get(root);
+        boolean[] vis=new boolean[c+1];
+        int[] componentId=new int[c+1];
+        Map<Integer,TreeSet<Integer>> componentMap=new HashMap<>();
 
-                    while (heap != null && !heap.isEmpty() && !online[heap.peek()]) {
-                        heap.poll();
-                    }
+        for(int node=1;node<=c;node++){
+            int id=node;
+            if(!vis[node])dfs(node,adjList,id,vis,componentId,componentMap);
+        }
 
-                    result.add((heap == null || heap.isEmpty()) ? -1 : heap.peek());
+        List<Integer> ans=new ArrayList<>();
+        for(int[] query:queries){
+            int operationType=query[0],node=query[1];
+            int nodeId=componentId[node];
+
+            if(operationType==1){
+                if(componentMap.get(nodeId).contains(node)){
+                    ans.add(node);
+                }else if(!componentMap.get(nodeId).isEmpty()){
+                    ans.add(componentMap.get(nodeId).first());
+                }else{
+                    ans.add(-1);
                 }
+            }else{
+                componentMap.get(nodeId).remove(node);
             }
         }
-
-        int[] ans = new int[result.size()];
-        for (int i = 0; i < result.size(); i++) {
-            ans[i] = result.get(i);
+        int[] res=new int[ans.size()];
+        int idx=0;
+        for(int num:ans){
+            res[idx++]=num;
         }
-        return ans;
+        return res;
     }
 }
