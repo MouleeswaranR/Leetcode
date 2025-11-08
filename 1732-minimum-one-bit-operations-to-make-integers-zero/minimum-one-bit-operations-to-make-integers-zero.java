@@ -1,27 +1,34 @@
-class Solution {
+public class Solution {
     public int minimumOneBitOperations(int n) {
-        if(n==0)return 0;
-
-        long[] bits=new long[32];
-       
-        bits[0]=1;
-        for(int i=1;i<=31;i++){
-            bits[i]=2*bits[i-1]+1;
+        if (n == 0) {
+            return 0;
         }
-        int result=0;
-        int sign=1;
-        for(int i=30;i>=0;i--){
-            int ith_bit=n&(1<<i);
 
-            if(ith_bit==0)continue;
+        long[] function = new long[32];
+        function[0] = 1;
+        for (int i = 1; i <= 31; i++) {
+            function[i] = 2 * function[i - 1] + 1;
+        }
 
-            if(sign>0){
-                result+=bits[i];
-            }else{
-                result-=bits[i];
+        int result = 0;
+        int sign = 1;
+
+        for (int i = 30; i >= 0; i--) {
+            int ithBit = ((1 << i) & n);
+
+            if (ithBit == 0) {
+                continue;
             }
-            sign*=-1;
+
+            if (sign > 0) {
+                result += function[i];
+            } else {
+                result -= function[i];
+            }
+
+            sign *= -1;
         }
+
         return result;
     }
 }
