@@ -2,7 +2,7 @@ class Solution {
     public int minimumOneBitOperations(int n) {
         if(n==0)return 0;
 
-        int[] bits=new int[32];
+        long[] bits=new long[32];
        
         bits[0]=1;
         for(int i=1;i<=31;i++){
