@@ -1,0 +1,27 @@
+class Solution {
+    public int bestClosingTime(String customers) {
+        int n=customers.length();
+
+        int minHour=0;
+        int penalty=0;
+        for(int i=0;i<n;i++){
+            if(customers.charAt(i)=='Y')penalty++;
+        }
+        if(penalty==0)return 0;
+        if(penalty==n)return n;
+        int minPenalty=penalty;
+
+        for(int i=0;i<n;i++){
+            if(customers.charAt(i)=='Y'){
+                penalty--;
+            }else{
+                penalty++;
+            }
+            if(penalty<minPenalty){
+                minPenalty=penalty;
+                minHour=i+1;
+            }
+        }
+        return minHour;
+    }
+}
