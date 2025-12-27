@@ -11,24 +11,23 @@ class Solution {
         });
         int[] freq = new int[n];
 
-        // Initially all rooms are free
         for (int i = 0; i < n; i++) {
             freeRooms.offer(new long[]{0, i});
         }
 
-        // Simulate Job Scheduling
+        
         for (int[] meeting : meetings) {
             long start = meeting[0];
             long end = meeting[1];
 
-            // Add rooms getting free now
+            
             while (!occupiedRooms.isEmpty() && occupiedRooms.peek()[0] <= start) {
                 long[] curr = occupiedRooms.poll();
                 curr[0] = 0;
                 freeRooms.offer(curr);
             }
 
-            // Assign a room to current meeting
+          
             if (!freeRooms.isEmpty()) {
                 long[] curr = freeRooms.poll();
                 freq[(int)curr[1]]++;
