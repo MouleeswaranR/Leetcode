@@ -48,6 +48,24 @@ class Solution {
 
             }
         }
+
+        //print longest subsequence
+        int i=m,j=n;
+        StringBuilder lcs=new StringBuilder();
+
+        while(i>0&&j>0){
+            if(text1.charAt(i-1)==text2.charAt(j-1)){
+                lcs.append(text1.charAt(i-1));
+                i--;j--;
+            }else{
+                if(memo[i-1][j]>memo[i][j-1]){
+                    i--;
+                }else{
+                    j--;
+                }
+            }
+        }
+        System.out.println(lcs.reverse().toString());
         return memo[m][n];
     }
 }
