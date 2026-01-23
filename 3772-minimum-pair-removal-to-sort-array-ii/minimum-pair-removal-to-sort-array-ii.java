@@ -1,123 +1,103 @@
 class Solution {
-
-    static class Pair {
+    class Pair {
         long sum;
-        int idx;
-
-        Pair(long sum, int idx) {
+        int left_idx;
+        
+        Pair(long sum, int left_idx) {
             this.sum = sum;
-            this.idx = idx;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Pair)) return false;
-            Pair p = (Pair) o;
-            return sum == p.sum && idx == p.idx;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sum, idx);
+            this.left_idx = left_idx;
         }
     }
-
+    
     public int minimumPairRemoval(int[] nums) {
         int n = nums.length;
-
-        long[] temp = new long[n];
+        if (n <= 1) return 0;
+        
+        boolean already_sorted = true;
+        for (int i = 1; i < n; i++) {
+            if (nums[i] < nums[i - 1]) {
+                already_sorted = false;
+                break;
+            }
+        }
+        if (already_sorted) return 0;
+        
+        long[] arr = new long[n];
         for (int i = 0; i < n; i++) {
-            temp[i] = nums[i];
+            arr[i] = nums[i];
         }
-
-        TreeSet<Pair> minPairSet = new TreeSet<>(
-            (a, b) -> {
-                if (a.sum != b.sum) return Long.compare(a.sum, b.sum);
-                return Integer.compare(a.idx, b.idx);
+        
+        boolean[] removed = new boolean[n];
+        
+        PriorityQueue<Pair> pq = new PriorityQueue<>(new Comparator<Pair>() {
+            public int compare(Pair a, Pair b) {
+                if (a.sum < b.sum) return -1;
+                if (a.sum > b.sum) return 1;
+                return Integer.compare(a.left_idx, b.left_idx);
             }
-        );
-
-        int[] nextIndex = new int[n];
-        int[] prevIndex = new int[n];
-
+        });
+        
+        int sorted_pairs = 0;
+        for (int i = 1; i < n; i++) {
+            pq.add(new Pair(arr[i - 1] + arr[i], i - 1));
+            if (arr[i] >= arr[i - 1]) sorted_pairs++;
+        }
+        
+        if (sorted_pairs == n - 1) return 0;
+        
+        int[] prev = new int[n], next = new int[n];
         for (int i = 0; i < n; i++) {
-            nextIndex[i] = i + 1;
-            prevIndex[i] = i - 1;
+            prev[i] = i - 1;
+            next[i] = i + 1;
         }
-
-        int badPairs = 0;
-        for (int i = 0; i < n - 1; i++) {
-            if (temp[i] > temp[i + 1]) {
-                badPairs++;
+        
+        int remaining = n, operations = 0;
+        while (remaining > 1) {
+            Pair top = pq.poll();
+            if (top == null) break;
+            
+            long sum = top.sum;
+            int left = top.left_idx, right = next[left];
+            
+            if (right >= n || removed[left] || removed[right] || 
+                arr[left] + arr[right] != sum) {
+                continue;
             }
-            minPairSet.add(new Pair(temp[i] + temp[i + 1], i));
-        }
-
-        int operations = 0;
-
-        while (badPairs > 0) {
-
-            Pair cur = minPairSet.first();
-            minPairSet.remove(cur);
-
-            int first = cur.idx;
-            int second = nextIndex[first];
-
-            int first_left = prevIndex[first];
-            int second_right = nextIndex[second];
-
-            if (temp[first] > temp[second]) {
-                badPairs--;
-            }
-
-            if (first_left >= 0) {
-                if (temp[first_left] > temp[first] &&
-                    temp[first_left] <= temp[first] + temp[second]) {
-                    badPairs--;
-                }
-                else if (temp[first_left] <= temp[first] &&
-                         temp[first_left] > temp[first] + temp[second]) {
-                    badPairs++;
-                }
-            }
-
-            if (second_right < n) {
-                if (temp[second_right] >= temp[second] &&
-                    temp[second_right] < temp[first] + temp[second]) {
-                    badPairs++;
-                }
-                else if (temp[second_right] < temp[second] &&
-                         temp[second_right] >= temp[first] + temp[second]) {
-                    badPairs--;
-                }
-            }
-
-            if (first_left >= 0) {
-                minPairSet.remove(
-                    new Pair(temp[first_left] + temp[first], first_left)
-                );
-                minPairSet.add(
-                    new Pair(temp[first_left] + temp[first] + temp[second], first_left)
-                );
-            }
-
-            if (second_right < n) {
-                minPairSet.remove(
-                    new Pair(temp[second] + temp[second_right], second)
-                );
-                minPairSet.add(
-                    new Pair(temp[first] + temp[second] + temp[second_right], first)
-                );
-                prevIndex[second_right] = first;
-            }
-
-            nextIndex[first] = second_right;
-            temp[first] += temp[second];
-
+            
+            int pre = prev[left], nxt = next[right];
+            
+            if (arr[left] <= arr[right]) sorted_pairs--;
+            if (pre != -1 && arr[pre] <= arr[left]) sorted_pairs--;
+            if (nxt != n && arr[right] <= arr[nxt]) sorted_pairs--;
+            
+            arr[left] = sum;
+            removed[right] = true;
+            remaining--;
             operations++;
-        }
+            
+            if (pre != -1) {
+                pq.add(new Pair(arr[pre] + arr[left], pre));
+                if (arr[pre] <= arr[left]) sorted_pairs++;
+                next[pre] = left;
+                prev[left] = pre;
+            } else {
+                prev[left] = -1;
+            }
+            
+            if (nxt != n) {
+                prev[nxt] = left;
+                next[left] = nxt;
+                pq.add(new Pair(arr[left] + arr[nxt], left));
+                if (arr[left] <= arr[nxt]) sorted_pairs++;
+            } else {
+                next[left] = n;
+            }
 
+            if (sorted_pairs == remaining - 1) {
+                return operations;
+            }
+        }
+        
         return operations;
     }
 }
