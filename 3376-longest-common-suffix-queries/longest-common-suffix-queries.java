@@ -5,7 +5,7 @@ class Solution {
         TrieNode[] children;
 
         TrieNode() {
-            idx = -1; // Initialize with a default value
+            idx = -1; 
             children = new TrieNode[26];
         }
     }
