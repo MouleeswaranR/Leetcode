@@ -1,34 +1,47 @@
 class Solution {
     public int networkDelayTime(int[][] times, int n, int k) {
-        ArrayList<ArrayList<int[]>> adj=new ArrayList<>();
-        for(int i=0;i<=n;i++)adj.add(new ArrayList<>());
+        //map to store node with their adjacent nodes and weights
+        Map<Integer,List<int[]>> adjList=new HashMap<>();
+
+
         for(int[] edge:times){
-            adj.get(edge[0]).add(new int[]{edge[1],edge[2]});
+            int currNode=edge[0],adjNode=edge[1],distance=edge[2];
+            adjList.computeIfAbsent(currNode,x->new ArrayList<>()).add(new int[]{adjNode,distance});;
         }
-        PriorityQueue<int[]> pq=new PriorityQueue<>((a,b)->a[1]-b[1]);
+
         int[] dist=new int[n+1];
         Arrays.fill(dist,Integer.MAX_VALUE);
-        dist[k]=0;
-        pq.add(new int[]{k,0});
+
+        PriorityQueue<int[]> pq=new PriorityQueue<>(
+            (a,b)->Integer.compare(a[0],b[0])
+        );
+
+        pq.offer(new int[]{0,k});//pushing source node k to queue
+        dist[k]=0;//updating source node distance to reach source node
+
         while(!pq.isEmpty()){
-            int[] tup=pq.remove();
-            int node=tup[0];
-            int dis=tup[1];
-            if(dis>dist[node])continue;
-            for(int[] adjList:adj.get(node)){
-                int adjNode=adjList[0];
-                int edgeW=adjList[1];
-                if(dis+edgeW<dist[adjNode]){
-                    dist[adjNode]=dis+edgeW;
-                    pq.add(new int[]{adjNode,dis+edgeW});
+            int[] topVal=pq.poll();
+            int distance=topVal[0],node=topVal[1];//current node and its distance from source node
+
+            if(distance>dist[node])continue;
+
+            //traversing current node's adjacent nodes
+            for(int[] neighbor:adjList.getOrDefault(node,new ArrayList<>())){
+                int adjNode=neighbor[0],adjNodeDistance=neighbor[1];
+
+                //if calulated distnace from current node to adj node is smaller than adj node shortest distance,update it
+                if(distance+adjNodeDistance<dist[adjNode]){
+                    dist[adjNode]=distance+adjNodeDistance;
+                    pq.offer(new int[]{distance+adjNodeDistance,adjNode});
                 }
             }
         }
-        int minTime=0;
+
+        int result=Integer.MIN_VALUE;
         for(int i=1;i<=n;i++){
-            if(dist[i]==Integer.MAX_VALUE)return -1;
-            minTime=Math.max(minTime,dist[i]);
+            result=Math.max(result,dist[i]);//getting max because needed minimum time to reach all nodes , so here using djikstra's ,we found shortest distance to all nodes from source node, so find the one which is max to find time to cover all nodes in the entire network
         }
-        return minTime;
+
+        return result==Integer.MAX_VALUE?-1:result;
     }
 }
