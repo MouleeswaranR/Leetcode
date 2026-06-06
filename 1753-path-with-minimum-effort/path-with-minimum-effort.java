@@ -1,46 +1,62 @@
-class Tuple{
-    int difference,row,col;
-    public Tuple(int row,int col,int diff ){
-        this.row=row;
-        this.col=col;
-        this.difference=diff;
-    }
-}
+//Dijikstra's algo
+//given source and destination
+//cost- maximum absolute difference 
+//requires minimum effort from all possible max abs fiff
 
 class Solution {
+
+    int[][] directions={{0,1},{1,0},{0,-1},{-1,0}};
+
+    public boolean isSafe(int newX,int newY,int m,int n){
+        return (newX>=0) && (newX<m) &&(newY>=0) && (newY<n);
+    }
+
     public int minimumEffortPath(int[][] heights) {
-        int n=heights.length;
-        int m=heights[0].length;
-        PriorityQueue<Tuple> pq=new PriorityQueue<>((x,y)->x.difference-y.difference);
-        pq.add(new Tuple(0,0,0));
-        int[][] dist=new int[n][m];
-        for(int i=0;i<n;i++){
-            for(int j=0;j<m;j++){
-                dist[i][j]=Integer.MAX_VALUE;
-            }
+        int rows=heights.length,cols=heights[0].length;
+
+        int[][] result=new int[rows][cols];//stored less abs diff to reach (x,y)
+
+        for(int[] row:result){
+            Arrays.fill(row,Integer.MAX_VALUE);
         }
-        dist[0][0]=0;
-        int[] drow={-1,0,1,0};
-        int[] dcol={0,1,0,-1};
+
+        PriorityQueue<int[]> pq=new PriorityQueue<>(
+            (a,b)->Integer.compare(a[0],b[0])
+        );
+
+        //storing {difference,x,y}: difference(minimum difference from (0,0) to x,y)
+        pq.offer(new int[]{0,0,0});
+        result[0][0]=0;//difference between abs diff val of [0][0] and  [0][0]=0
+
         while(!pq.isEmpty()){
-            Tuple it=pq.peek();
-            pq.remove();
-            int row=it.row;
-            int col=it.col;
-            int diff=it.difference;
-            if(row==n-1 && col==m-1)return diff;
-            for(int i=0;i<4;i++){
-                int nrow=row+drow[i];
-                int ncol=col+dcol[i];
-                if(nrow>=0 && nrow<n && ncol>=0 && ncol<m){
-                    int maxEff=Math.max(diff,Math.abs(heights[row][col]-heights[nrow][ncol]));
-                    if(maxEff<dist[nrow][ncol]){
-                        dist[nrow][ncol]=maxEff;
-                        pq.add(new Tuple(nrow,ncol,maxEff));
+            int[] top=pq.poll();
+            int diff=top[0],x=top[1],y=top[2];//difference obtained minimum from (0,0) to (x,y)
+
+            //as used min heap, it always stores minimum cost at top for desatination cell
+            if(x==rows-1 && y==cols-1)return diff;
+
+            //traversing through 4 directions from (x,y)
+            for(int[] direction:directions){
+                int newX=direction[0]+x,newY=y+direction[1];
+
+                //check if new coordinates is not out of bounds
+                if(isSafe(newX,newY,rows,cols)  ){
+
+                    //Absolute difference(cost) between (x,y) to (newX,newY)
+                    int absDiff=Math.abs(heights[x][y]-heights[newX][newY]);
+
+                    //getting maximum difference still current cell (because that's the question asks for max abs difference)
+                    int newDiff=Math.max(diff,absDiff);
+
+                    //if stored result for (newX,newY)>newDiff, update it
+                    if(result[newX][newY]>newDiff){
+                        result[newX][newY]=newDiff;
+                        pq.offer(new int[]{newDiff,newX,newY});
                     }
                 }
             }
         }
-        return -1;
+
+        return result[rows-1][cols-1];
     }
 }
