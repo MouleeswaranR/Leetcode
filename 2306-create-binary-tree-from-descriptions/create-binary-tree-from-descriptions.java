@@ -18,7 +18,7 @@ class Solution {
         Map<Integer, TreeNode> mp = new HashMap<>();
         Set<Integer> childSet = new HashSet<>();
 
-        // Create nodes and set up parent-child relationships
+
         for (int[] description : descriptions) {
             int parent = description[0];
             int child = description[1];
