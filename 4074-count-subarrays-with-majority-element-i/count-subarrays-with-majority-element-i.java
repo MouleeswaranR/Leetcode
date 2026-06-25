@@ -1,27 +1,26 @@
 class Solution {
     public int countMajoritySubarrays(int[] nums, int target) {
         int n=nums.length;
+        int[] preCount=new int[2*n+1];
 
-        int[] pre=new int[2*n+1];
+        int result=0,validLeftPoints=0;
+        int currSum=n;
 
-        int ans=0,preSum=0,cnt=n;
-
-        pre[n]=1;
+        preCount[n]=1;
 
         for(int num:nums){
             if(num==target){
-                preSum+=pre[cnt];
-
-                cnt++;
-                pre[cnt]++;
+                validLeftPoints+=preCount[currSum];
+                currSum++;
             }else{
-                cnt--;
-                preSum-=pre[cnt];
-                pre[cnt]++;
+                currSum--;
+                validLeftPoints-=preCount[currSum];
             }
-            ans+=preSum;
+
+            preCount[currSum]++;
+            result+=validLeftPoints;
         }
 
-        return ans;
+        return result;
     }
 }
