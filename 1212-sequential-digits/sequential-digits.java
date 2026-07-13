@@ -11,9 +11,6 @@ class Solution {
 
         List<Integer> ans=new ArrayList<>();
 
-        int n=allPossible.size();
-        
-
         for(int num:allPossible){
             if(num<low)continue;
 
@@ -23,5 +20,7 @@ class Solution {
         }
 
         return ans;
+
+
     }
 }
